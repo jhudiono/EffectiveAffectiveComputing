@@ -5,37 +5,21 @@ from keras.layers import Input, Flatten, Dense, Dropout
 from keras.models import Model
 import logging
 
-def multi_class(base_model, optimizer='adam', layers=[]):
+def multi_class(base_model, optimizer='adam', add_layers=[]):
 	input = Input(shape=(224,224,3), name='image_input')
 	for layer in base_model.layers:
 		layer.trainable=False
 
 	output_model = base_model(input)
 	x = Flatten(name='flatten')(output_model)
-	for layer in layers:
+	for layer in add_layers:
 		x = layer(x)
-	x = Dense(7, activation='softmax', name='output')(x)
+	x = Dense(7, activation='softmax', name='predictions')(x)
+	# Happy, sad, anger, disgust, surprise, fear, neutral
 
 	my_model = Model(input=input, output=x)
 	my_model.compile(optimizer=optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
 	return my_model
-
-'''
-def single_class(base_model, optimizer='adadelta', dropout=None, activation='sigmoid'):
-	input = Input(shape=(224,224,3), name='image_input')
-	for layer in base_model.layers:
-    		layer.trainable=False
-
-	output_model = base_model(input)
-	x = Flatten(name='flatten')(output_model)
-	if dropout:
-		x = Dropout(rate=dropout)(x)
-	x = Dense(1, activation='sigmoid', name='output')(x)  # 2 = binary
-
-	my_model = Model(input=input, output=x)
-	my_model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
-	return my_model
-'''
 
 def single_class(base_model, optimizer='adadelta', layers=[], activation='sigmoid'):
 	input = Input(shape=(224,224,3), name='image_input')
